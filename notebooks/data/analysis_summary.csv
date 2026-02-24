@@ -1,2 +1,0 @@
-total_loans,date_range_start,date_range_end,total_volume,mean_loan,median_loan,std_loan,num_quarters,avg_quarterly_sales,outlier_percentage,adf_pvalue,is_stationary
-1148302,2009-01-29,2025-11-06,3778636979.3399997,3290.6299730732853,2000.0,4215.634916092559,68,55568190.87264706,10.742557271519166,0.3146014911674517,False
