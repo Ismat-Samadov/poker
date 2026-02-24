@@ -1,0 +1,15 @@
+.claude
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+node_modules
+.next
+dist
+build
+*.log
+.env
+.DS_Store
+.vscode
+.idea
+*.swp
