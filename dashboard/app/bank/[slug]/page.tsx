@@ -80,7 +80,7 @@ export default function BankPage() {
   const maxCashback = offers.length > 0 ? Math.max(...offers.map(o => o.cashback_percentage || 0)) : 0;
   const avgCashback = offers.length > 0
     ? (offers.reduce((sum, o) => sum + (o.cashback_percentage || 0), 0) / offers.length).toFixed(1)
-    : 0;
+    : '0.0';
 
   return (
     <div className="min-h-screen bg-gray-50">
