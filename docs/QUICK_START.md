@@ -209,7 +209,7 @@ pip install psycopg2-binary python-dotenv requests beautifulsoup4 lxml
 ### "DATABASE_URL not found"
 Make sure `.env` file exists in root with:
 ```
-DATABASE_URL=postgresql://neondb_owner:npg_9fskSUmpyv4u@ep-snowy-field-aitjz58d-pooler.c-4.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
+DATABASE_URL=
 ```
 
 ### Dashboard won't start
