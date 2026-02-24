@@ -82,15 +82,15 @@ class DatabaseHelper:
         finally:
             conn.close()
 
-    def deactivate_offers(self):
-        """Deactivate all existing offers for this bank before scraping"""
+    def delete_old_offers(self):
+        """Delete all existing offers for this bank before scraping new data"""
         conn = self.get_connection()
         try:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"UPDATE cashback.{self.bank_table_name} SET is_active = false"
-                )
+                cur.execute(f"DELETE FROM cashback.{self.bank_table_name}")
+                deleted_count = cur.rowcount
                 conn.commit()
+                return deleted_count
         finally:
             conn.close()
 

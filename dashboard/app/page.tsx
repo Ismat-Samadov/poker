@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface Bank {
   id: number;
@@ -10,186 +11,171 @@ interface Bank {
   is_active: boolean;
 }
 
-interface Offer {
-  id: number;
-  bank_name: string;
-  merchant_name: string;
-  cashback_percentage: number;
-  cashback_amount: number;
-  description: string;
-  terms: string;
-  source_url: string;
-  scraped_at: string;
-}
-
 export default function Home() {
   const [banks, setBanks] = useState<Bank[]>([]);
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [selectedBank, setSelectedBank] = useState<string>('');
+  const [stats, setStats] = useState({ totalOffers: 0, maxCashback: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBanks();
-    fetchOffers();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    if (selectedBank) {
-      fetchOffers(selectedBank);
-    } else {
-      fetchOffers();
-    }
-  }, [selectedBank]);
-
-  const fetchBanks = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/banks');
-      const data = await res.json();
-      setBanks(data);
-    } catch (error) {
-      console.error('Error fetching banks:', error);
-    }
-  };
+      // Fetch banks
+      const banksRes = await fetch('/api/banks');
+      const banksData = await banksRes.json();
+      setBanks(banksData);
 
-  const fetchOffers = async (bank?: string) => {
-    setLoading(true);
-    try {
-      const url = bank ? `/api/offers?bank=${bank}` : '/api/offers';
-      const res = await fetch(url);
-      const data = await res.json();
-      setOffers(data);
+      // Fetch all offers for stats
+      const offersRes = await fetch('/api/offers');
+      const offersData = await offersRes.json();
+
+      const maxCashback = offersData.length > 0
+        ? Math.max(...offersData.map((o: any) => o.cashback_percentage || 0))
+        : 0;
+
+      setStats({
+        totalOffers: offersData.length,
+        maxCashback: maxCashback
+      });
     } catch (error) {
-      console.error('Error fetching offers:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading banks...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Azerbaijan Bank Cashback Dashboard
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Compare cashback offers from all major banks in one place
-          </p>
+      <header className="bg-white shadow-lg border-b-4 border-blue-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-3">
+              🏦 Azerbaijan Cashback Dashboard
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Compare cashback offers from all major banks in one place.
+              Find the best deals and maximize your savings!
+            </p>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Bank Filter */}
-        <div className="mb-6">
-          <label htmlFor="bank-select" className="block text-sm font-medium text-gray-700 mb-2">
-            Filter by Bank
-          </label>
-          <select
-            id="bank-select"
-            value={selectedBank}
-            onChange={(e) => setSelectedBank(e.target.value)}
-            className="block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">All Banks</option>
-            {banks.map((bank) => (
-              <option key={bank.id} value={bank.table_name}>
-                {bank.display_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Total Banks</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{banks.length}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm font-medium">Total Banks</p>
+                <p className="text-4xl font-bold mt-2">{banks.length}</p>
+              </div>
+              <div className="text-5xl opacity-20">🏦</div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Active Offers</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{offers.length}</p>
+
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm font-medium">Total Offers</p>
+                <p className="text-4xl font-bold mt-2">{stats.totalOffers}</p>
+              </div>
+              <div className="text-5xl opacity-20">💳</div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500">Best Cashback</h3>
-            <p className="text-3xl font-bold text-blue-600 mt-2">
-              {offers.length > 0 ? `${offers[0].cashback_percentage}%` : 'N/A'}
-            </p>
+
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">Best Cashback</p>
+                <p className="text-4xl font-bold mt-2">{stats.maxCashback}%</p>
+              </div>
+              <div className="text-5xl opacity-20">🎁</div>
+            </div>
           </div>
         </div>
 
-        {/* Offers Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Cashback Offers
-            </h3>
-          </div>
+        {/* Banks Grid */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <span className="bg-blue-100 text-blue-800 rounded-lg px-3 py-1 mr-3">
+              Select a Bank
+            </span>
+          </h2>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading offers...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {banks.map((bank) => (
+              <Link
+                key={bank.id}
+                href={`/bank/${bank.table_name}`}
+                className="group"
+              >
+                <div className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 p-6 border-2 border-gray-100 hover:border-blue-500 transform hover:-translate-y-1">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-3xl">🏦</span>
+                    </div>
+                    <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {bank.display_name}
+                    </h3>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      View Offers →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-8 mt-12">
+          <div className="max-w-3xl mx-auto text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              💡 How It Works
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="text-3xl mb-2">🔍</div>
+                <h4 className="font-semibold text-gray-900 mb-1">Browse Banks</h4>
+                <p className="text-sm text-gray-600">Select any bank to see their cashback offers</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="text-3xl mb-2">📊</div>
+                <h4 className="font-semibold text-gray-900 mb-1">Compare Offers</h4>
+                <p className="text-sm text-gray-600">See percentages, terms, and descriptions</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="text-3xl mb-2">💰</div>
+                <h4 className="font-semibold text-gray-900 mb-1">Save Money</h4>
+                <p className="text-sm text-gray-600">Choose the best cashback deals for you</p>
+              </div>
             </div>
-          ) : offers.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No offers found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Bank
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Merchant
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cashback
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Updated
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {offers.map((offer) => (
-                    <tr key={offer.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {offer.bank_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {offer.merchant_name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                          {offer.cashback_percentage}%
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {offer.description || 'No description'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(offer.scraped_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Data is automatically updated daily via GitHub Actions</p>
-          <p className="mt-1">Last updated: {offers.length > 0 ? new Date(offers[0].scraped_at).toLocaleString() : 'N/A'}</p>
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-500">
+            🔄 Data is automatically updated daily
+          </p>
+          <p className="text-xs text-gray-400 mt-2">
+            Azerbaijan Cashback Dashboard © 2024
+          </p>
         </div>
       </main>
     </div>

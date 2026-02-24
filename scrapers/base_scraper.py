@@ -70,8 +70,10 @@ class BaseScraper(ABC):
         print(f"{'='*60}")
 
         try:
-            # Deactivate existing offers
-            self.db.deactivate_offers()
+            # Delete old data before inserting new
+            deleted = self.db.delete_old_offers()
+            if deleted > 0:
+                print(f"  Deleted {deleted} old offers")
 
             # Scrape offers
             offers = self.scrape()
