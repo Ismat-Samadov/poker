@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Dark background circle -->
+  <circle cx="32" cy="32" r="32" fill="#060d1a"/>
+  <!-- Glowing card -->
+  <rect x="12" y="10" width="28" height="40" rx="4" fill="#1a2540" stroke="#22d3ee" stroke-width="1.5"/>
+  <rect x="16" y="16" width="20" height="28" rx="2" fill="#0a1628" stroke="#22d3ee" stroke-width="0.5" opacity="0.5"/>
+  <!-- Spade symbol (center) -->
+  <text x="26" y="34" text-anchor="middle" font-size="18" font-family="serif" fill="#22d3ee">♠</text>
+  <!-- Rank top-left -->
+  <text x="15" y="22" font-size="9" font-family="sans-serif" font-weight="bold" fill="#22d3ee">A</text>
+  <!-- Second card shadow -->
+  <rect x="24" y="14" width="28" height="40" rx="4" fill="#1e2d4a" stroke="#a855f7" stroke-width="1" opacity="0.7"/>
+  <!-- Heart on second card -->
+  <text x="38" y="38" text-anchor="middle" font-size="14" font-family="serif" fill="#f43f5e" opacity="0.8">♥</text>
+  <!-- Neon glow dots -->
+  <circle cx="10" cy="54" r="2" fill="#22d3ee" opacity="0.6"/>
+  <circle cx="54" cy="54" r="2" fill="#a855f7" opacity="0.6"/>
+  <circle cx="10" cy="10" r="2" fill="#fbbf24" opacity="0.6"/>
+</svg>
